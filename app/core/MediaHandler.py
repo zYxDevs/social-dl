@@ -51,9 +51,11 @@ class ExtractAndSendMedia:
                 if match := url_map.get(urlparse(link).netloc):
                     tasks.append(task_group.create_task(match.start(link)))
                 else:
-                    for key, val in url_map.items():
-                        if key in link:
-                            tasks.append(task_group.create_task(val.start(link)))
+                    tasks.extend(
+                        task_group.create_task(val.start(link))
+                        for key, val in url_map.items()
+                        if key in link
+                    )
         self.media_objects = [task.result() for task in tasks if task.result()]
 
     async def send_media(self):
@@ -108,7 +110,7 @@ class ExtractAndSendMedia:
         if not path:
             docs = await asyncio.gather(*[aiohttp_tools.in_memory_dl(doc) for doc in docs])
         else:
-            [os.rename(file_, file_ + ".png") for file_ in glob.glob(f"{path}/*.webp")]
+            [os.rename(file_, f"{file_}.png") for file_ in glob.glob(f"{path}/*.webp")]
             docs = glob.glob(f"{path}/*")
         for doc in docs:
             try:
@@ -131,7 +133,7 @@ class ExtractAndSendMedia:
             await asyncio.sleep(1)
 
     async def sort_media_path(self, path, caption):
-        [os.rename(file_, file_ + ".png") for file_ in glob.glob(f"{path}/*.webp")]
+        [os.rename(file_, f"{file_}.png") for file_ in glob.glob(f"{path}/*.webp")]
         images, videos, animations = [], [], []
         for file in glob.glob(f"{path}/*"):
             if file.endswith((".png", ".jpg", ".jpeg")):

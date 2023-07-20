@@ -44,14 +44,13 @@ class Instagram(ScraperConfig):
         elif type_check == "GraphSidecar":
             self.link = [i["node"].get("video_url") or i["node"].get("display_url") for i in json_["edge_sidecar_to_children"]["edges"]]
             self.group = True
+        elif link := json_.get("video_url"):
+            self.link = link
+            self.thumb = json_.get("display_url")
+            self.video = True
         else:
-            if link := json_.get("video_url"):
-                self.link = link
-                self.thumb = json_.get("display_url")
-                self.video = True
-            else:
-                self.link = json_.get("display_url")
-                self.photo = True
+            self.link = json_.get("display_url")
+            self.photo = True
         return self.link
 
     # Rotating Key function to avoid hitting limit on single Key

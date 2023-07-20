@@ -14,7 +14,7 @@ class Gallery_DL(ScraperConfig):
         self.set_sauce(url)
 
     async def download_or_extract(self):
-        self.path = "downloads/" + str(time.time())
+        self.path = f"downloads/{str(time.time())}"
         os.makedirs(self.path)
         try:
             async with asyncio.timeout(30):

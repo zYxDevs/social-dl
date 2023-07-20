@@ -12,7 +12,7 @@ async def dl(bot, message):
     if media.exceptions:
         exceptions = "\n".join(media.exceptions)
         await bot.log(text=exceptions, func="DL", chat=message.chat.id, name="traceback.txt")
-        return await reply.edit(f"Media Download Failed.")
+        return await reply.edit("Media Download Failed.")
     if media.media_objects:
         await message.delete()
     await reply.delete()

@@ -22,7 +22,7 @@ async def purge_(bot, message: Message):
         return await message.reply("reply to a message")
     start_message = reply.id
     end_message = message.id
-    messages = [end_message] + [i for i in range(int(start_message), int(end_message))]
+    messages = [end_message] + list(range(int(start_message), int(end_message)))
     await bot.delete_messages(chat_id=message.chat.id, message_ids=messages, revoke=True)
 
 
@@ -30,10 +30,9 @@ async def purge_(bot, message: Message):
 async def get_ids(bot, message):
     if reply := message.replied:
         ids = ""
-        reply_forward = reply.forward_from_chat
         reply_user = reply.from_user
         ids += f"Chat : `{reply.chat.id}`\n"
-        if reply_forward:
+        if reply_forward := reply.forward_from_chat:
             ids += f"Replied {'Channel' if reply_forward.type == ChatType.CHANNEL else 'Chat'} : `{reply_forward.id}`\n"
         if reply_user:
             ids += f"User : {reply.from_user.id}"
@@ -59,10 +58,7 @@ async def join_chat(bot, message):
 
 @bot.add_cmd(cmd="leave")
 async def leave_chat(bot, message):
-    if message.input:
-        chat = message.input
-    else:
-        chat = message.chat.id
+    chat = message.input if message.input else message.chat.id
     try:
         await bot.leave_chat(chat)
     except Exception as e:
