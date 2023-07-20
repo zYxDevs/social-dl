@@ -55,5 +55,4 @@ class Message(MSG):
 
     @classmethod
     def parse_message(cls, message):
-        ret_obj = cls(message)
-        return ret_obj
+        return cls(message)

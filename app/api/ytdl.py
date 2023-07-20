@@ -26,8 +26,8 @@ class YT_DL(ScraperConfig):
         super().__init__()
         self.set_sauce(url)
         self.url = url
-        self.path = "downloads/" + str(time.time())
-        self.video_path = self.path + "/v.mp4"
+        self.path = f"downloads/{str(time.time())}"
+        self.video_path = f"{self.path}/v.mp4"
         self._opts = {
             "outtmpl": self.video_path,
             "ignoreerrors": True,

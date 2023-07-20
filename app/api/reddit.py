@@ -31,7 +31,7 @@ class Reddit(ScraperConfig):
         is_vid, is_gallery = json_.get("is_video"), json_.get("is_gallery")
 
         if is_vid:
-            self.path = "downloads/" + str(time.time())
+            self.path = f"downloads/{str(time.time())}"
             os.makedirs(self.path)
             self.link = f"{self.path}/v.mp4"
             vid_url = json_["secure_media"]["reddit_video"]["hls_url"]

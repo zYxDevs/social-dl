@@ -89,8 +89,7 @@ class Scraper:
     def generate_x_bogus_url(url: str, headers: dict) -> str:
         query = urllib.parse.urlparse(url).query
         xbogus = execjs.compile(open("./X-Bogus.js").read()).call("sign", query, headers["User-Agent"])
-        new_url = url + "&X-Bogus=" + xbogus
-        return new_url
+        return f"{url}&X-Bogus={xbogus}"
 
     # 转换链接/convert url
     @retry(stop=stop_after_attempt(4), wait=wait_fixed(7))
@@ -135,7 +134,7 @@ class Scraper:
                                     else response.headers["Location"]
                                 )
                                 if not quiet_mode:
-                                    print("获取原始链接成功, 原始链接为: {}".format(url))
+                                    print(f"获取原始链接成功, 原始链接为: {url}")
                                 return url
                 except Exception as e:
                     if not quiet_mode:
@@ -145,9 +144,8 @@ class Scraper:
                     raise e
             else:
                 if not quiet_mode:
-                    print("该链接为原始链接,无需转换,原始链接为: {}".format(url))
+                    print(f"该链接为原始链接,无需转换,原始链接为: {url}")
                 return url
-        # 判断是否为TikTok分享链接/judge if it is a TikTok share link
         elif "tiktok" in url:
             """
             TikTok视频链接类型(不全)：
@@ -158,7 +156,7 @@ class Scraper:
             """
             if "@" in url:
                 if not quiet_mode:
-                    print("该链接为原始链接,无需转换,原始链接为: {}".format(url))
+                    print(f"该链接为原始链接,无需转换,原始链接为: {url}")
                 return url
             else:
                 if not quiet_mode:
@@ -173,7 +171,7 @@ class Scraper:
                                     else response.headers["Location"]
                                 )
                                 if not quiet_mode:
-                                    print("获取原始链接成功, 原始链接为: {}".format(url))
+                                    print(f"获取原始链接成功, 原始链接为: {url}")
                                 return url
                 except Exception as e:
                     if not quiet_mode:
@@ -211,9 +209,8 @@ class Scraper:
         query = urllib.parse.urlparse(url).query
         xbogus = execjs.compile(open("./X-Bogus.js").read()).call("sign", query, self.headers["User-Agent"])
         if not quiet_mode:
-            print("生成的X-Bogus签名为: {}".format(xbogus))
-        new_url = url + "&X-Bogus=" + xbogus
-        return new_url
+            print(f"生成的X-Bogus签名为: {xbogus}")
+        return f"{url}&X-Bogus={xbogus}"
 
     # 获取抖音视频ID/Get Douyin video ID
     async def get_douyin_video_id(self, original_url: str) -> Union[str, None]:
@@ -230,32 +227,29 @@ class Scraper:
             if "/video/" in video_url:
                 key = re.findall("/video/(\d+)?", video_url)[0]
                 if not quiet_mode:
-                    print("获取到的抖音视频ID为: {}".format(key))
+                    print(f"获取到的抖音视频ID为: {key}")
                 return key
-            # 发现页 https://www.douyin.com/discover?modal_id=7086770907674348841
             elif "discover?" in video_url:
                 key = re.findall("modal_id=(\d+)", video_url)[0]
                 if not quiet_mode:
-                    print("获取到的抖音视频ID为: {}".format(key))
+                    print(f"获取到的抖音视频ID为: {key}")
                 return key
-            # 直播页
             elif "live.douyin" in video_url:
                 # https://live.douyin.com/1000000000000000000
                 video_url = video_url.split("?")[0] if "?" in video_url else video_url
                 key = video_url.replace("https://live.douyin.com/", "")
                 if not quiet_mode:
-                    print("获取到的抖音直播ID为: {}".format(key))
+                    print(f"获取到的抖音直播ID为: {key}")
                 return key
-            # note
             elif "note" in video_url:
                 # https://www.douyin.com/note/7086770907674348841
                 key = re.findall("/note/(\d+)?", video_url)[0]
                 if not quiet_mode:
-                    print("获取到的抖音笔记ID为: {}".format(key))
+                    print(f"获取到的抖音笔记ID为: {key}")
                 return key
         except Exception as e:
             if not quiet_mode:
-                print("获取抖音视频ID出错了:{}".format(e))
+                print(f"获取抖音视频ID出错了:{e}")
             return None
 
     # 获取单个抖音视频数据/Get single Douyin video data
@@ -273,7 +267,7 @@ class Scraper:
             api_url = self.generate_x_bogus_url(api_url)
             # 访问API/Access API
             if not quiet_mode:
-                print("正在获取视频数据API: {}".format(api_url))
+                print(f"正在获取视频数据API: {api_url}")
             async with aiohttp.ClientSession() as session:
                 async with session.get(api_url, headers=self.douyin_api_headers, proxy=self.proxies, timeout=10) as response:
                     response = await response.json()
@@ -285,7 +279,7 @@ class Scraper:
                     return video_data
         except Exception as e:
             if not quiet_mode:
-                print("获取抖音视频数据失败！原因:{}".format(e))
+                print(f"获取抖音视频数据失败！原因:{e}")
             # return None
             raise e
 
@@ -300,7 +294,7 @@ class Scraper:
             api_url = f"https://live.douyin.com/webcast/web/enter/?aid=6383&web_rid={web_rid}"
             # 访问API/Access API
             if not quiet_mode:
-                print("正在获取视频数据API: {}".format(api_url))
+                print(f"正在获取视频数据API: {api_url}")
             async with aiohttp.ClientSession() as session:
                 async with session.get(api_url, headers=self.douyin_api_headers, proxy=self.proxies, timeout=10) as response:
                     response = await response.json()
@@ -313,7 +307,7 @@ class Scraper:
                     return video_data
         except Exception as e:
             if not quiet_mode:
-                print("获取抖音视频数据失败！原因:{}".format(e))
+                print(f"获取抖音视频数据失败！原因:{e}")
             # return None
             raise e
 
@@ -329,7 +323,7 @@ class Scraper:
                     return response
         except Exception as e:
             if not quiet_mode:
-                print("获取抖音视频数据失败！原因:{}".format(e))
+                print(f"获取抖音视频数据失败！原因:{e}")
             # return None
             raise e
 
@@ -345,7 +339,7 @@ class Scraper:
                     return response
         except Exception as e:
             if not quiet_mode:
-                print("获取抖音视频数据失败！原因:{}".format(e))
+                print(f"获取抖音视频数据失败！原因:{e}")
             # return None
             raise e
 
@@ -361,7 +355,7 @@ class Scraper:
                     return response
         except Exception as e:
             if not quiet_mode:
-                print("获取抖音视频数据失败！原因:{}".format(e))
+                print(f"获取抖音视频数据失败！原因:{e}")
             # return None
             raise e
 
@@ -383,12 +377,12 @@ class Scraper:
             elif "/v/" in original_url:
                 video_id = re.findall("/v/(\d+)", original_url)[0]
             if not quiet_mode:
-                print("获取到的TikTok视频ID是{}".format(video_id))
+                print(f"获取到的TikTok视频ID是{video_id}")
             # 返回视频ID/Return video ID
             return video_id
         except Exception as e:
             if not quiet_mode:
-                print("获取TikTok视频ID出错了:{}".format(e))
+                print(f"获取TikTok视频ID出错了:{e}")
             return None
 
     @retry(stop=stop_after_attempt(4), wait=wait_fixed(7))
@@ -404,7 +398,7 @@ class Scraper:
             # 构造访问链接/Construct the access link
             api_url = f"https://api16-normal-c-useast1a.tiktokv.com/aweme/v1/feed/?aweme_id={video_id}"
             if not quiet_mode:
-                print("正在获取视频数据API: {}".format(api_url))
+                print(f"正在获取视频数据API: {api_url}")
             async with aiohttp.ClientSession() as session:
                 async with session.get(api_url, headers=self.tiktok_api_headers, proxy=self.proxies, timeout=10) as response:
                     response = await response.json()
@@ -414,7 +408,7 @@ class Scraper:
                     return video_data
         except Exception as e:
             if not quiet_mode:
-                print("获取视频信息失败！原因:{}".format(e))
+                print(f"获取视频信息失败！原因:{e}")
             # return None
             raise e
 
@@ -429,7 +423,7 @@ class Scraper:
                     return response
         except Exception as e:
             if not quiet_mode:
-                print("获取抖音视频数据失败！原因:{}".format(e))
+                print(f"获取抖音视频数据失败！原因:{e}")
             # return None
             raise e
 
@@ -444,7 +438,7 @@ class Scraper:
                     return response
         except Exception as e:
             if not quiet_mode:
-                print("获取抖音视频数据失败！原因:{}".format(e))
+                print(f"获取抖音视频数据失败！原因:{e}")
             # return None
             raise e
 
@@ -455,13 +449,13 @@ class Scraper:
         # URL平台判断/Judge URL platform
         url_platform = "douyin" if "douyin" in video_url else "tiktok"
         if not quiet_mode:
-            print("当前链接平台为:{}".format(url_platform))
+            print(f"当前链接平台为:{url_platform}")
             # 获取视频ID/Get video ID
             print("正在获取视频ID...")
         video_id = await self.get_douyin_video_id(video_url) if url_platform == "douyin" else await self.get_tiktok_video_id(video_url)
         if video_id:
             if not quiet_mode:
-                print("获取视频ID成功,视频ID为:{}".format(video_id))
+                print(f"获取视频ID成功,视频ID为:{video_id}")
                 # 获取视频数据/Get video data
                 print("正在获取视频数据...")
             data = await self.get_douyin_video_data(video_id) if url_platform == "douyin" else await self.get_tiktok_video_data(video_id)
@@ -488,10 +482,10 @@ class Scraper:
                 # assumed to be a video type
                 url_type = url_type_code_dict.get(url_type_code, "video")
                 if not quiet_mode:
-                    print("数据类型代码: {}".format(url_type_code))
+                    print(f"数据类型代码: {url_type_code}")
                     # 判断链接类型/Judge link type
 
-                    print("数据类型: {}".format(url_type))
+                    print(f"数据类型: {url_type}")
                     print("准备开始判断并处理数据...")
 
                 """
@@ -604,7 +598,7 @@ class Scraper:
                                 "image_data": {"no_watermark_image_list": no_watermark_image_list, "watermark_image_list": watermark_image_list}
                             }
                     # 更新数据/Update data
-                    result_data.update(api_data)
+                    result_data |= api_data
                     # print("数据处理完成，最终数据: \n{}".format(result_data))
                     # 返回数据/Return data
                     return result_data
@@ -627,20 +621,33 @@ class Scraper:
     def hybrid_parsing_minimal(data: dict) -> dict:
         # 如果数据获取成功/If the data is successfully obtained
         if data["status"] == "success":
-            result = {
+            return {
                 "status": "success",
                 "message": data.get("message"),
                 "platform": data.get("platform"),
                 "type": data.get("type"),
                 "desc": data.get("desc"),
-                "wm_video_url": data["video_data"]["wm_video_url"] if data["type"] == "video" else None,
-                "wm_video_url_HQ": data["video_data"]["wm_video_url_HQ"] if data["type"] == "video" else None,
-                "nwm_video_url": data["video_data"]["nwm_video_url"] if data["type"] == "video" else None,
-                "nwm_video_url_HQ": data["video_data"]["nwm_video_url_HQ"] if data["type"] == "video" else None,
-                "no_watermark_image_list": data["image_data"]["no_watermark_image_list"] if data["type"] == "image" else None,
-                "watermark_image_list": data["image_data"]["watermark_image_list"] if data["type"] == "image" else None,
+                "wm_video_url": data["video_data"]["wm_video_url"]
+                if data["type"] == "video"
+                else None,
+                "wm_video_url_HQ": data["video_data"]["wm_video_url_HQ"]
+                if data["type"] == "video"
+                else None,
+                "nwm_video_url": data["video_data"]["nwm_video_url"]
+                if data["type"] == "video"
+                else None,
+                "nwm_video_url_HQ": data["video_data"]["nwm_video_url_HQ"]
+                if data["type"] == "video"
+                else None,
+                "no_watermark_image_list": data["image_data"][
+                    "no_watermark_image_list"
+                ]
+                if data["type"] == "image"
+                else None,
+                "watermark_image_list": data["image_data"]["watermark_image_list"]
+                if data["type"] == "image"
+                else None,
             }
-            return result
         else:
             return data
 
@@ -669,7 +676,7 @@ async def async_test(_douyin_url: str = None, _tiktok_url: str = None) -> None:
 
     # 总耗时/Total time
     total_time = round(time.time() - start_time, 2)
-    print("异步测试完成，总耗时: {}s".format(total_time))
+    print(f"异步测试完成，总耗时: {total_time}s")
 
 
 if __name__ == "__main__":
